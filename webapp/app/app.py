@@ -2,21 +2,21 @@ __author__ = "mikazz"
 __version__ = "1.0"
 
 from rq import Queue, Connection
-from flask import Flask, request, jsonify, abort, send_file
+import rq_dashboard
+from redis import Redis
 
+from flask import Flask, request, jsonify, abort, send_file
+from flask import flash, redirect, render_template
+from werkzeug.utils import secure_filename
+
+from jobs import run_benford_job
+from file_utils import create_directory_name, allowed_file
 
 import os
-from flask import flash, redirect, url_for, send_from_directory, render_template
-from werkzeug.utils import secure_filename
-from redis import Redis
-from webapp.app.jobs import run_benford_job
-
-
 import zipfile
 import io
 import pathlib
-import rq_dashboard
-import csv
+
 
 app = Flask(__name__)
 app.secret_key = "secret key"
@@ -35,28 +35,11 @@ PORT = 5000
 DEBUG = True
 
 
+# File appears not to be in CSV format; move along
 def allowed_file_ext(filename):
     """Return True if file extension of a file name is in ALLOWED_EXTENSIONS"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-def allowed_file(uploaded_file):
-    return True
-    # try:
-    #     with uploaded_file as csvfile:
-    #         start = csvfile.read(4096)
-    #
-    #         # isprintable does not allow newlines, printable does not allow umlauts...
-    #         if not all([c in string.printable or c.isprintable() for c in start]):
-    #             return False
-    #         dialect = csv.Sniffer().sniff(start)
-    #         return True
-    # except csv.Error:
-    #     # Could not get a csv dialect -> probably not a csv.
-    #     return False
-
-
-# File appears not to be in CSV format; move along
 
 @app.route('/')
 def upload_form():
@@ -76,15 +59,20 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file_ext(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            directory_name = create_directory_name()
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], directory_name))
+
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], directory_name, filename))
             flash('File successfully uploaded')
 
             if allowed_file(file):
                 flash('File Accepted')
-                run_job()
+                run_job(directory_name)
+
                 return redirect('/')
             else:
-                flash(f"Incorrect file structure. Make sure it's valid delimited")
+                flash(f"Incorrect file structure. Make sure it's delimited")
                 return redirect(request.url)
         else:
             flash(f'Allowed file types are: {ALLOWED_EXTENSIONS}')
@@ -92,12 +80,12 @@ def upload_file():
 
 
 #@app.route('/job', methods=['POST'])
-def run_job():
+def run_job(directory_name):
     job_func_name = run_benford_job
 
     with Connection(connection=Redis()):
         q = Queue()
-        job = q.enqueue(job_func_name, page_url=page_url, job_timeout=60)
+        job = q.enqueue(job_func_name, directory_name=directory_name, job_timeout=60)
 
     response_object = {
         'status': 'success',
