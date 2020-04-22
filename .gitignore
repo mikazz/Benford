@@ -1,0 +1,12 @@
+.idea
+.env
+.pytest_cache
+env
+venv
+__pycache__
+*.pyc
+*.sqlite
+*.coverage
+.DS_Store
+env.sh
+migrations
