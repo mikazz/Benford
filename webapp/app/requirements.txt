@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+selenium
+redis
+rq
+rq_dashboard
+flask
+flask_testing

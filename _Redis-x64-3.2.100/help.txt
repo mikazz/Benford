@@ -1,0 +1,28 @@
+## Installing Redis
+
+# Redis help
+https://redis.io/topics/quickstart
+
+# Redis.exe for Windows Download (skip if Linux)
+https://github.com/microsoftarchive/redis/releases
+
+# Installation (Skip if Windows)
+wget http://download.redis.io/redis-stable.tar.gz
+tar xvzf redis-stable.tar.gz
+cd redis-stable
+make
+
+# Run redis (Window Terminal 1)
+redis-server
+
+# Check if Redis is working (Window Terminal 2)
+redis-cli ping
+
+# Enable monitoring
+redis.cli monitor (Window Terminal 3)
+
+------------------------------------------------------------------------------------------------------------------------
+
+## Spin up the containers
+docker-compose up -d --build
+
