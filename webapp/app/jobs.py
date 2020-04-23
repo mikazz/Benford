@@ -3,6 +3,10 @@ import sys
 import math
 from collections import defaultdict
 import matplotlib.pyplot as plt
+import glob
+import os
+import pathlib
+
 
 # Benford's Law percentages for leading digits 1-9
 BENFORD = [30.1, 17.6, 12.5, 9.7, 7.9, 6.7, 5.8, 5.1, 4.6]
@@ -93,13 +97,21 @@ def bar_chart(data_pct):
 
 def run_benford_job(directory_name):
     """Check conformance of numerical data to Benford's Law."""
-    print(directory_name)
-    time.sleep(1)
+    #print(directory_name)
 
     # load data
-    filename = "Illinois_votes.txt"
+
+    path = os.path.join("uploads", directory_name)
+    print(path)
+    filename = list(pathlib.Path(path).glob('*.txt'))
+    #filename = list(pathlib.Path('your_directory').glob('*.txt'))
+
+    #filename = os.path.join("uploads", directory_name, "*.txt")
+    print(filename)
+
     try:
         data_list = load_data(filename)
+
     except IOError as e:
         return "Unable to load"
 
@@ -125,3 +137,7 @@ def run_benford_job(directory_name):
         print("Observed distribution does not match expected.", file=sys.stderr)
 
     bar_chart(data_pct)
+
+
+run_benford_job("266420267206323604056330692745096401834")
+

@@ -10,7 +10,7 @@ from flask import flash, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
 
 from jobs import run_benford_job
-from file_utils import create_directory_name, allowed_file
+from file_utils import create_directory_name, is_allowed_file
 
 import os
 import zipfile
@@ -32,7 +32,7 @@ app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
 HOST = "127.0.0.1"
 PORT = 5000
-DEBUG = True
+DEBUG = False
 
 
 def allowed_file_ext(filename):
@@ -62,18 +62,19 @@ def upload_file():
             directory_name = create_directory_name()
             os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], directory_name))
 
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], directory_name, filename))
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], directory_name, filename)
+            file.save(file_path)
             flash('File successfully uploaded')
 
-            if allowed_file(file):
-                flash('File Uploaded')
+            if is_allowed_file(file_path):
+                flash('File Accepted')
                 response = run_job(directory_name)
                 # print(response.json["data"])
                 job_id = response.json["data"]["job_id"]
                 return redirect(url_for('get_job', job_id=job_id))
 
             else:
-                flash(f"Incorrect file structure. Make sure it's delimited")
+                flash("Incorrect file structure.")
                 return redirect(request.url)
         else:
             flash(f'Allowed file types are: {ALLOWED_EXTENSIONS}')
