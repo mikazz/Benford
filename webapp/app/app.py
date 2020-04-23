@@ -6,7 +6,7 @@ import rq_dashboard
 from redis import Redis
 
 from flask import Flask, request, jsonify, abort, send_file
-from flask import flash, redirect, render_template
+from flask import flash, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
 
 from jobs import run_benford_job
@@ -35,7 +35,6 @@ PORT = 5000
 DEBUG = True
 
 
-# File appears not to be in CSV format; move along
 def allowed_file_ext(filename):
     """Return True if file extension of a file name is in ALLOWED_EXTENSIONS"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -67,10 +66,12 @@ def upload_file():
             flash('File successfully uploaded')
 
             if allowed_file(file):
-                flash('File Accepted')
-                run_job(directory_name)
+                flash('File Uploaded')
+                response = run_job(directory_name)
+                # print(response.json["data"])
+                job_id = response.json["data"]["job_id"]
+                return redirect(url_for('get_job', job_id=job_id))
 
-                return redirect('/')
             else:
                 flash(f"Incorrect file structure. Make sure it's delimited")
                 return redirect(request.url)
@@ -79,13 +80,13 @@ def upload_file():
             return redirect(request.url)
 
 
-#@app.route('/job', methods=['POST'])
+@app.route('/job', methods=['POST'])
 def run_job(directory_name):
-    job_func_name = run_benford_job
+    job_function_name = run_benford_job
 
     with Connection(connection=Redis()):
         q = Queue()
-        job = q.enqueue(job_func_name, directory_name=directory_name, job_timeout=60)
+        job = q.enqueue(job_function_name, directory_name=directory_name, job_timeout=60)
 
     response_object = {
         'status': 'success',
@@ -94,21 +95,22 @@ def run_job(directory_name):
             'job_func_name': job.func_name,
             'job_args': job.args,
             'job_kwargs': job.kwargs,
-            'job_status_url': f"http://{HOST}:{PORT}/jobs/{job.get_id()}",
-            'job_download_url': f"http://{HOST}:{PORT}/jobs/{job.get_id()}/download",
             'job_is_queued': job.is_queued,
             'job_enqueued_at': job.enqueued_at,
         }
     }
-    return jsonify(response_object), 202  # ACCEPTED
+    return jsonify(response_object)
 
 
-@app.route('/jobs/<job_id>', methods=['GET'])
+# @app.route('/job')
+# def job_form():
+#     #return render_template('job.html')
+#     return render_template('job.html', job=json.loads(r.text)['movies'])
+
+
+@app.route('/job/<job_id>')
 def get_job(job_id):
-    """
-        Get single job status
-        curl -X GET http://localhost:5000/jobs/7758ecb7-59db-40b0-8336-8a38e087e5b6
-    """
+
     with Connection(connection=Redis()):
         q = Queue()
         job = q.fetch_job(job_id)
@@ -124,11 +126,6 @@ def get_job(job_id):
                 'job_timeout': job.timeout,
                 'job_enqueued_at': job.enqueued_at,
                 'job_ended_at': job.ended_at,
-                'job_exc_info': job.exc_info,
-                'job_dependent_ids': job.dependent_ids,
-                'job_meta': job.meta,
-                'job_status_url': f"http://{HOST}:{PORT}/jobs/{job.get_id()}",
-                'job_download_url': f"http://{HOST}:{PORT}/jobs/{job.get_id()}/download",
                 'job_func_name': job.func_name,
                 'job_args': job.args,
                 'job_kwargs': job.kwargs,
@@ -149,60 +146,40 @@ def get_job(job_id):
         response_object = {
             'status': 'ERROR: Unable to fetch the job from RQ'
         }
-    return jsonify(response_object)
+    #return jsonify(response_object)
+    #return render_template('job.html', job=response_object)
 
+    directory_name = job.kwargs["directory_name"]
+    # with open(os.path.join(app.config['UPLOAD_FOLDER'], directory_name, 'english_words.txt')) as f:
+    #     f.read()
+    result = directory_name
+    print(job.kwargs)
+    print(job.kwargs["directory_name"])
 
-@app.route('/jobs/<job_id>/download', methods=['GET'])
-def get_job_download(job_id):
+    return render_template('job.html', job=response_object, result=result)
 
-    with Connection(connection=Redis()):
-        q = Queue()
-        job = q.fetch_job(job_id)
-
-    if not job.get_status() == "finished":
-        abort(404)
-
-    directory_name = job.kwargs.get("page_url")
-    directory_name = url_to_page_name(directory_name)
-
-    # if dir there is none so what?
-
-    base_path = pathlib.Path(directory_name)
-    data = io.BytesIO()
-    with zipfile.ZipFile(data, mode='w') as z:
-        for f_name in base_path.iterdir():
-            z.write(f_name)
-    data.seek(0)
-    return send_file(
-        data,
-        mimetype='application/zip',
-        as_attachment=True,
-        attachment_filename=f'{directory_name}.zip'
-    )
-
-
-@app.route('/jobs', methods=['GET'])
-def get_jobs():
-    """
-        curl -X GET http://localhost:5000/jobs
-    """
-    with Connection(connection=Redis()):
-        q = Queue()
-        jobs = q.get_jobs()
-
-    if jobs:
-        response_object = {
-            'status': 'success',
-            'in_queue_jobs_number': str(len(q)),
-            'jobs': str(jobs)
-        }
-
-    else:
-        response_object = {
-            'status': 'success',
-            'queue_size': f'{len(q)}'
-        }
-    return jsonify(response_object)
+# @app.route('/jobs', methods=['GET'])
+# def get_jobs():
+#     """
+#         curl -X GET http://localhost:5000/jobs
+#     """
+#     with Connection(connection=Redis()):
+#         q = Queue()
+#         jobs = q.get_jobs()
+#
+#     if jobs:
+#         response_object = {
+#             'status': 'success',
+#             'in_queue_jobs_number': str(len(q)),
+#             'jobs': str(jobs)
+#         }
+#
+#     else:
+#         response_object = {
+#             'status': 'success',
+#             'queue_size': f'{len(q)}'
+#         }
+#     return jsonify(response_object)
 
 
 if __name__ == '__main__':
