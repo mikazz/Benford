@@ -7,8 +7,8 @@ import pandas as pd
 def create_directory_name():
     """Return identifier for directories"""
     id_number = str(uuid.uuid1().int)
-    today = date.today()
-    date_today = today.strftime("%b-%d-%Y-")
+    # today = date.today()
+    # date_today = today.strftime("%b-%d-%Y-")
     # return date_today + id_number
     return id_number
 
@@ -62,6 +62,7 @@ def is_allowed_file(file_name, return_dataframe=False):
                 # print("Accepted")
                 if return_dataframe:
                     df = pd.read_csv(file_name)
+                    df = df.select_dtypes(include=nums)
                     # print(df)
                     return df
                 else:
@@ -81,6 +82,7 @@ def is_allowed_file(file_name, return_dataframe=False):
             # print("Accepted")
             if return_dataframe:
                 df = pd.read_csv(file_name, sep=dialect.delimiter)
+                df = df.select_dtypes(include=nums)
                 # print(df)
                 return df
             else:

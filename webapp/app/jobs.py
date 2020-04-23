@@ -6,16 +6,23 @@ import matplotlib.pyplot as plt
 import glob
 import os
 import pathlib
-
+from file_utils import is_allowed_file
 
 # Benford's Law percentages for leading digits 1-9
 BENFORD = [30.1, 17.6, 12.5, 9.7, 7.9, 6.7, 5.8, 5.1, 4.6]
 
 
 def load_data(filename):
-    """Open a text file & return a list of strings."""
-    with open(filename) as f:
-        return f.read().strip().split('\n')
+    """Open a text file & return a list of strings. (lines) """
+    df = is_allowed_file(file_name=filename, return_dataframe=True)
+    df = df.dropna()
+    # Get column name
+    column_name = list(df)[0]
+    # Transform pandas dataframe to list
+    data_list = df[column_name].tolist()
+    # Transform elements to ints and later strings
+    data_list = [str(int(i)) for i in data_list]
+    return data_list
 
 
 def count_first_digits(data_list):
@@ -60,7 +67,7 @@ def chi_square_test(data_count, expected_counts):
     return chi_square_stat < 15.51
 
 
-def bar_chart(data_pct):
+def bar_chart(data_pct, save_path):
     """Make bar chart of observed vs expected 1st digit frequency in percent."""
     fig, ax = plt.subplots()
 
@@ -92,7 +99,8 @@ def bar_chart(data_pct):
     ax.legend(prop={'size': 15}, frameon=False)
 
     # plt.show()
-    plt.savefig('plot.png')
+    save_path = os.path.join(save_path, 'plot.png')
+    plt.savefig(save_path)
 
 
 def run_benford_job(directory_name):
@@ -101,9 +109,10 @@ def run_benford_job(directory_name):
 
     # load data
 
-    path = os.path.join("uploads", directory_name)
-    print(path)
-    filename = list(pathlib.Path(path).glob('*.txt'))
+    directory_path = os.path.join("uploads", directory_name)
+    print(directory_path)
+    filename = list(pathlib.Path(directory_path).glob('*.txt'))
+    filename = filename[0]  # There should be only one file
     #filename = list(pathlib.Path('your_directory').glob('*.txt'))
 
     #filename = os.path.join("uploads", directory_name, "*.txt")
@@ -136,8 +145,9 @@ def run_benford_job(directory_name):
     else:
         print("Observed distribution does not match expected.", file=sys.stderr)
 
-    bar_chart(data_pct)
+    bar_chart(data_pct=data_pct, save_path=directory_path)
 
 
-run_benford_job("266420267206323604056330692745096401834")
+#run_benford_job("266420267206323604056330692745096401834")
+#run_benford_job("1")
 
