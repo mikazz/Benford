@@ -5,7 +5,7 @@ from rq import Queue, Connection
 import rq_dashboard
 from redis import Redis
 
-from flask import Flask, request, jsonify, abort, send_file
+from flask import Flask, request, jsonify, abort, send_from_directory
 from flask import flash, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
 
@@ -13,10 +13,8 @@ from jobs import run_benford_job
 from file_utils import create_directory_name, is_allowed_file
 
 import os
-import zipfile
-import io
-import pathlib
-
+import pickledb
+import shutil
 
 app = Flask(__name__)
 app.secret_key = "secret key"
@@ -34,6 +32,9 @@ HOST = "127.0.0.1"
 PORT = 5000
 DEBUG = False
 
+# Jobs database
+db = pickledb.load('jobs.db', False)
+
 
 def allowed_file_ext(filename):
     """Return True if file extension of a file name is in ALLOWED_EXTENSIONS"""
@@ -48,7 +49,7 @@ def upload_form():
 @app.route('/', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
+        # Check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -59,6 +60,11 @@ def upload_file():
         if file and allowed_file_ext(file.filename):
             filename = secure_filename(file.filename)
 
+            # Rename file extension to txt
+            #from pathlib import Path
+            #p = Path('mysequence.fasta')
+            #p.rename(p.with_suffix('.aln'))
+
             directory_name = create_directory_name()
             os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], directory_name))
 
@@ -66,15 +72,22 @@ def upload_file():
             file.save(file_path)
             flash('File successfully uploaded')
 
-            if is_allowed_file(file_path):
+            file_ok, log_message = is_allowed_file(file_path)
+
+            if file_ok:
                 flash('File Accepted')
+
+                # Lets start a Redis Job
                 response = run_job(directory_name)
-                # print(response.json["data"])
                 job_id = response.json["data"]["job_id"]
+                # And Let's wait for the results in 'waiting room' page
                 return redirect(url_for('get_job', job_id=job_id))
 
             else:
                 flash("Incorrect file structure.")
+                flash(log_message)
+                shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], directory_name))
+
                 return redirect(request.url)
         else:
             flash(f'Allowed file types are: {ALLOWED_EXTENSIONS}')
@@ -89,6 +102,10 @@ def run_job(directory_name):
         q = Queue()
         job = q.enqueue(job_function_name, directory_name=directory_name, job_timeout=60)
 
+    # Save Job details to DB
+    db.set(job.get_id(), directory_name)
+    db.dump()
+
     response_object = {
         'status': 'success',
         'data': {
@@ -101,12 +118,6 @@ def run_job(directory_name):
         }
     }
     return jsonify(response_object)
-
-
-# @app.route('/job')
-# def job_form():
-#     #return render_template('job.html')
-#     return render_template('job.html', job=json.loads(r.text)['movies'])
 
 
 @app.route('/job/<job_id>')
@@ -147,17 +158,21 @@ def get_job(job_id):
         response_object = {
             'status': 'ERROR: Unable to fetch the job from RQ'
         }
-    #return jsonify(response_object)
-    #return render_template('job.html', job=response_object)
 
-    directory_name = job.kwargs["directory_name"]
-    # with open(os.path.join(app.config['UPLOAD_FOLDER'], directory_name, 'english_words.txt')) as f:
-    #     f.read()
-    result = directory_name
-    print(job.kwargs)
-    print(job.kwargs["directory_name"])
+    # Retrieve directory id by providing known job id
+    directory_name = db.get(job_id)
+    # If there is no such directory yet
+    if directory_name is False:
+        abort(404)
 
-    return render_template('job.html', job=response_object, result=result)
+    filename = f"{directory_name}.png"
+    return render_template('job.html', job=response_object, image_name=filename)
+
+
+@app.route('/upload/<filename>')
+def send_image(filename):
+    return send_from_directory("images", filename)
+
 
 # @app.route('/jobs', methods=['GET'])
 # def get_jobs():

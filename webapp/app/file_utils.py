@@ -34,15 +34,12 @@ def is_allowed_file(file_name, return_dataframe=False):
     lines = open_file(file_name)
 
     if not lines:
-        # print("File is empty")
-        return False
+        return False, "File is empty"
 
     lines = ''.join(lines)
     try:
         # Try to detect csv separator.
         dialect = csv.Sniffer().sniff(lines, delimiters=',|;\t')
-        # if dialect.delimiter:
-        # print(f"Found delimiter:'{dialect.delimiter}'")
 
     except Exception:
         # print("Couldn't recognize column delimiter. Maybe it's a one column file?")
@@ -51,43 +48,39 @@ def is_allowed_file(file_name, return_dataframe=False):
             df = pd.read_csv(file_name).head()
             filtered_df = df.select_dtypes(include=nums)
         except Exception:
-            # print("Cant process. Bad file structure")
-            return False
+            return False, "Cant process. Bad file structure"
 
         else:
             if filtered_df.empty:
-                # print("File doesn't any numeric columns")
-                return False
+                return False, "File doesn't any numeric columns"
+
             else:
-                # print("Accepted")
+                # OK
                 if return_dataframe:
                     df = pd.read_csv(file_name)
                     df = df.select_dtypes(include=nums)
-                    # print(df)
                     return df
                 else:
-                    return True
+                    return True, "One column file"
 
     else:
         df = pd.read_csv(file_name, sep=dialect.delimiter).head()
         filtered_df = df.select_dtypes(include=nums)
 
         if filtered_df.empty:
-            # print("File doesn't contain numeric columns")
-            return False
+            return False, "File doesn't contain numeric columns"
+
         elif len(filtered_df.columns) > 2:
-            # print("File contains too many numeric columns")
-            return False
+            return False, "File contains too many numeric columns"
+
         else:
-            # print("Accepted")
+            # OK
             if return_dataframe:
                 df = pd.read_csv(file_name, sep=dialect.delimiter)
                 df = df.select_dtypes(include=nums)
-                # print(df)
                 return df
             else:
-                return True
-
+                return True, f"CSV File. Found delimiter:'{dialect.delimiter}'"
 
 
 if __name__ == "__main__":

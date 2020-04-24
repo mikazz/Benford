@@ -8,6 +8,9 @@ import os
 import pathlib
 from file_utils import is_allowed_file
 
+#from app import UPLOAD_FOLDER
+UPLOAD_FOLDER = "uploads"
+
 # Benford's Law percentages for leading digits 1-9
 BENFORD = [30.1, 17.6, 12.5, 9.7, 7.9, 6.7, 5.8, 5.1, 4.6]
 
@@ -99,17 +102,18 @@ def bar_chart(data_pct, save_path):
     ax.legend(prop={'size': 15}, frameon=False)
 
     # plt.show()
-    save_path = os.path.join(save_path, 'plot.png')
+    #save_path = os.path.join(save_path, 'plot.png')
+
     plt.savefig(save_path)
 
 
 def run_benford_job(directory_name):
     """Check conformance of numerical data to Benford's Law."""
-    #print(directory_name)
 
     # load data
+    plot_save_path = os.path.join("images", f"{directory_name}.png")
 
-    directory_path = os.path.join("uploads", directory_name)
+    directory_path = os.path.join(UPLOAD_FOLDER, directory_name)
     print(directory_path)
     filename = list(pathlib.Path(directory_path).glob('*.txt'))
     filename = filename[0]  # There should be only one file
@@ -145,9 +149,6 @@ def run_benford_job(directory_name):
     else:
         print("Observed distribution does not match expected.", file=sys.stderr)
 
-    bar_chart(data_pct=data_pct, save_path=directory_path)
-
-
-#run_benford_job("266420267206323604056330692745096401834")
-#run_benford_job("1")
+    #bar_chart(data_pct=data_pct, save_path=directory_path)
+    bar_chart(data_pct=data_pct, save_path=plot_save_path)
 
