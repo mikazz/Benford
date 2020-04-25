@@ -98,10 +98,9 @@ def upload_file():
                 flash("Incorrect file structure.")
                 flash(log_message)
                 shutil.rmtree(os.path.join(app.config['UPLOAD_FOLDER'], directory_name))
-
                 return redirect(request.url)
         else:
-            flash(f'Allowed file types are: {ALLOWED_EXTENSIONS}')
+            flash(f"Allowed file types are: {', '.join(ALLOWED_EXTENSIONS)}")
             return redirect(request.url)
 
 
@@ -172,19 +171,33 @@ def get_job(job_id):
 
     # Retrieve directory id by providing known job id
     directory_name = jobs_collection.find_one({"key": job_id})
-    directory_name = directory_name['data']
 
     # If there is no such directory yet
-    if directory_name is False:
+    if not directory_name:
         abort(404)
+    directory_name = directory_name['data']
 
     image_filename = f"{directory_name}.png"
 
     json_result = result_collection.find_one({"key": directory_name})
-    if json_result:
-        print(json_result['data'])
 
-    return render_template('job.html', job=response_object, image_name=image_filename, json_result=json_result)
+    if json_result:
+        observed_counts = json_result["data"]["observed_counts"]
+        expected_counts = json_result["data"]["expected_counts"]
+        first_digit_probabilities = json_result["data"]["first_digit_probabilities"]
+        chi_squared_test_statistic = json_result["data"]["chi-squared_test_statistic"]
+        result = json_result["data"]["result"]
+    else:
+        observed_counts = None
+        expected_counts = None
+        first_digit_probabilities = None
+        chi_squared_test_statistic = None
+        result = None
+
+    return render_template('job.html', job=response_object, image_name=image_filename,
+                           observed_counts=observed_counts,
+                           expected_counts=expected_counts, first_digit_probabilities=first_digit_probabilities,
+                           chi_squared_test_statistic=chi_squared_test_statistic, result=result)
 
 
 @app.route('/upload/<filename>')
@@ -195,7 +208,13 @@ def send_image(filename):
 @app.route('/jobs', methods=['GET'])
 def get_jobs():
     jobs_list = jobs_collection.find()
-    #jobs_list = db_jobs.getall()
+
+    jobs = []
+    for job in jobs_list:
+        jobs.append(job)
+
+    jobs_list = [job["key"] for job in jobs if "key" in job]  # that's nice
+
     return render_template('jobs.html', jobs=list(jobs_list))
 
 

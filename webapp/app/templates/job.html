@@ -10,7 +10,13 @@
 
 <body>
   <div>Job Results</div>
-  <pre id="json_results">{{ json_result }}</pre>
+  <p>Observed_counts: {{observed_counts}}</p>
+  <p>Expected_counts: {{expected_counts}}</p>
+  First_digit_probabilities:
+  <pre id="json_first_digit_probabilities">{{first_digit_probabilities}}</pre>
+
+  <p>Chi-squared Test: {{chi_squared_test_statistic}}</p>
+  <p>Result: {{result}}</p>
 
   <img src="{{url_for('send_image', filename=image_name)}}" >
 
