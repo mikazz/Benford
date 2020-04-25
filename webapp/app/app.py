@@ -1,6 +1,8 @@
 __author__ = "mikazz"
 __version__ = "1.0"
 
+from pymongo import MongoClient
+
 from rq import Queue, Connection
 import rq_dashboard
 from redis import Redis
@@ -17,7 +19,7 @@ import pickledb
 import shutil
 
 app = Flask(__name__)
-app.secret_key = "secret key"
+app.secret_key = "install-gentoo"
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads'
@@ -33,7 +35,26 @@ PORT = 5000
 DEBUG = False
 
 # Jobs database
-db = pickledb.load('jobs.db', False)
+db_jobs = pickledb.load('jobs.db', False)
+
+# MONGO DATABASE CONFIGURATION
+
+# Connecting to MongoDB
+client = MongoClient('localhost', 27017)
+# Getting a Database
+db = client['app']
+# Create Collection
+if not db['result_collection']:
+    db.create_collection("result_collection")
+else:
+    result_collection = db['result_collection']
+
+if not db['jobs_collection']:
+    db.create_collection("jobs_collection")
+    print(f"Creating Collection: jobs_collection")
+else:
+    jobs_collection = db['jobs_collection']
+    print(f"Already exist Collection: jobs_collection")
 
 
 def allowed_file_ext(filename):
@@ -59,11 +80,6 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file_ext(file.filename):
             filename = secure_filename(file.filename)
-
-            # Rename file extension to txt
-            #from pathlib import Path
-            #p = Path('mysequence.fasta')
-            #p.rename(p.with_suffix('.aln'))
 
             directory_name = create_directory_name()
             os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], directory_name))
@@ -102,9 +118,12 @@ def run_job(directory_name):
         q = Queue()
         job = q.enqueue(job_function_name, directory_name=directory_name, job_timeout=60)
 
-    # Save Job details to DB
-    db.set(job.get_id(), directory_name)
-    db.dump()
+    # We need to Save Redis Job details to DB (they disappear after 500 seconds)
+    # db_jobs.set(job.get_id(), directory_name)
+
+    #db_jobs.dump()
+    post = {"key": job.get_id(), "data": directory_name}
+    jobs_collection.insert_one(post)
 
     response_object = {
         'status': 'success',
@@ -160,13 +179,18 @@ def get_job(job_id):
         }
 
     # Retrieve directory id by providing known job id
-    directory_name = db.get(job_id)
+    directory_name = db_jobs.get(job_id)
     # If there is no such directory yet
     if directory_name is False:
         abort(404)
 
-    filename = f"{directory_name}.png"
-    return render_template('job.html', job=response_object, image_name=filename)
+    image_filename = f"{directory_name}.png"
+
+    json_result = result_collection.find_one({"key": directory_name})
+    if json_result:
+        print(json_result['data'])
+
+    return render_template('job.html', job=response_object, image_name=image_filename, json_result=json_result)
 
 
 @app.route('/upload/<filename>')
@@ -174,28 +198,10 @@ def send_image(filename):
     return send_from_directory("images", filename)
 
 
-# @app.route('/jobs', methods=['GET'])
-# def get_jobs():
-#     """
-#         curl -X GET http://localhost:5000/jobs
-#     """
-#     with Connection(connection=Redis()):
-#         q = Queue()
-#         jobs = q.get_jobs()
-#
-#     if jobs:
-#         response_object = {
-#             'status': 'success',
-#             'in_queue_jobs_number': str(len(q)),
-#             'jobs': str(jobs)
-#         }
-#
-#     else:
-#         response_object = {
-#             'status': 'success',
-#             'queue_size': f'{len(q)}'
-#         }
-#     return jsonify(response_object)
+@app.route('/jobs', methods=['GET'])
+def get_jobs():
+    jobs_list = db_jobs.getall()
+    return render_template('jobs.html', jobs=list(jobs_list))
 
 
 if __name__ == '__main__':

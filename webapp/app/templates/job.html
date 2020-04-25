@@ -1,19 +1,22 @@
-<!doctype html>
-<title>Result Page</title>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Result Page</title>
+</head>
+
 <h2>Results</h2>
 
-<html>
-  <body>
-    <div>Job Results</div>
-    <li>{{ result }}</li>
+<body>
+  <div>Job Results</div>
+  <pre id="json_results">{{ json_result }}</pre>
 
-    <div>Directory Name</div>
-    <li>{{ directory_name }}</li>
+  <img src="{{url_for('send_image', filename=image_name)}}" >
 
-    <img src="{{url_for('send_image', filename=image_name)}}" >
+  <div>Redis Job Details:</div>
+  <pre id="json_redis_job">{{ job }}</pre>
 
-    <div>Redis Job Details:</div>
-    <pre id="json">{{ job }}</pre>
+</body>
 
-  </body>
 </html>

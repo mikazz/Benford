@@ -1,3 +1,7 @@
+"""
+    Tests
+"""
+
 from flask_testing import TestCase
 import unittest
 from webapp.app.app import app
@@ -33,6 +37,8 @@ class TestMainBlueprint(BaseTestCase):
         response = self.client.get("/jobs", follow_redirects=True)
         # Then
         self.assertEqual(response.status_code, 200)
+
+
 
     def test_post_job_get_text(self):
         """

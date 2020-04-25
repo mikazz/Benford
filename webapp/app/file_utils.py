@@ -85,9 +85,4 @@ def is_allowed_file(file_name, return_dataframe=False):
 
 if __name__ == "__main__":
     pass
-    #is_allowed_file("../../checking/check/PythonStackTraces.txt")
-    #is_allowed_file("../../checking/check/empty.txt")
-    #is_allowed_file("../../checking/check/Illinois_votes.txt")
-    #is_allowed_file("../../checking/check/no_nums.txt")
-    #is_allowed_file("../../checking/check/cenzo.txt")
 

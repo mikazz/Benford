@@ -1,7 +1,6 @@
 # Benford
  
- 
-## Main
+ ## Main
 
 * User input validation and protection
 * The preferred form of asynchronous execution - a separate worker that could potentially work on another machine 
@@ -21,3 +20,12 @@ see what's happening with their order (stopped?, running?, done?).
 information. And job (computations) will be executed by separate worker(s). Each worker will process a single job
 at a time. Within a worker, there is no concurrent processing going on, so if we want to perform more jobs concurrently,
 we simply have to start more workers (scalability).
+
+## What to do next?
+* Implement better json DBMS (MongoDB)
+
+## References
+* [Redis](https://redis.io/)
+* [RQ (Redis Queue): Simple job queues for Python](https://python-rq.org/)
+* [PickleDB](https://pythonhosted.org/pickleDB/)
+

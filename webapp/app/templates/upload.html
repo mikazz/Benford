@@ -1,15 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <title>File Upload Page</title>
 <h2>Select a file to upload</h2>
 
-<div>File have to be:</div>
+<div>File has to be:</div>
 <ul>
 	<li>In CSV format (Accepted delimiters: tab, colon (,) semicolon (;) vertical bar (|)</li>
 	<li>CSV can have any number of columns, but no more than one numeric</li>
 	<li>Accepted extensions are *.txt and *.csv</li>
-	<li>File can also be made out of one numeric column without header</li>
+	<li>File can also be made out of one numeric column without header (tldr: just numbers as rows)</li>
 </ul>
-
 
 <p>
 	{% with messages = get_flashed_messages() %}
@@ -22,6 +22,7 @@
 	  {% endif %}
 	{% endwith %}
 </p>
+
 <form method="post" action="/" enctype="multipart/form-data">
     <dl>
 		<p>
@@ -32,3 +33,9 @@
 		<input type="submit" value="Submit">
 	</p>
 </form>
+
+<h2>Or browse other users datasets</h2>
+<p>
+	<a href="/jobs">User's dataset</a>
+</p>
+</html>
