@@ -15,7 +15,6 @@ from jobs import run_benford_job
 from file_utils import create_directory_name, is_allowed_file
 
 import os
-import pickledb
 import shutil
 
 app = Flask(__name__)
@@ -34,16 +33,14 @@ HOST = "127.0.0.1"
 PORT = 5000
 DEBUG = False
 
-# Jobs database
-db_jobs = pickledb.load('jobs.db', False)
-
-# MONGO DATABASE CONFIGURATION
+# MONGO DATABASE CONFIGURATION (Jobs and Results databases)
 
 # Connecting to MongoDB
 client = MongoClient('localhost', 27017)
 # Getting a Database
 db = client['app']
-# Create Collection
+
+# Create Collections
 if not db['result_collection']:
     db.create_collection("result_collection")
 else:
@@ -51,10 +48,8 @@ else:
 
 if not db['jobs_collection']:
     db.create_collection("jobs_collection")
-    print(f"Creating Collection: jobs_collection")
 else:
     jobs_collection = db['jobs_collection']
-    print(f"Already exist Collection: jobs_collection")
 
 
 def allowed_file_ext(filename):
@@ -119,9 +114,6 @@ def run_job(directory_name):
         job = q.enqueue(job_function_name, directory_name=directory_name, job_timeout=60)
 
     # We need to Save Redis Job details to DB (they disappear after 500 seconds)
-    # db_jobs.set(job.get_id(), directory_name)
-
-    #db_jobs.dump()
     post = {"key": job.get_id(), "data": directory_name}
     jobs_collection.insert_one(post)
 
@@ -179,7 +171,9 @@ def get_job(job_id):
         }
 
     # Retrieve directory id by providing known job id
-    directory_name = db_jobs.get(job_id)
+    directory_name = jobs_collection.find_one({"key": job_id})
+    directory_name = directory_name['data']
+
     # If there is no such directory yet
     if directory_name is False:
         abort(404)
@@ -200,7 +194,8 @@ def send_image(filename):
 
 @app.route('/jobs', methods=['GET'])
 def get_jobs():
-    jobs_list = db_jobs.getall()
+    jobs_list = jobs_collection.find()
+    #jobs_list = db_jobs.getall()
     return render_template('jobs.html', jobs=list(jobs_list))
 
 
