@@ -34,24 +34,6 @@ class TestMainBlueprint(BaseTestCase):
         # Then
         self.assertEqual(response.status_code, 200)
 
-    def test_post_job(self):
-        """
-            Test Add Job
-        """
-
-        # Given
-        payload = {
-            "directory_name": "test",
-        }
-
-        # When
-        response = self.client.post('/job', data=payload)
-        print(response)
-
-        # Then
-        #self.assertEqual("success", response.json['status'])
-        self.assertEqual(202, response.status_code)
-
 
 if __name__ == "__main__":
     unittest.main()
