@@ -3,7 +3,7 @@ version: '3.5'
 services:
 
   web:
-    build: ./webapp/app
+    build: ./webapp
     image: webapp
     container_name: webapp
     ports:
@@ -32,4 +32,4 @@ services:
     container_name: rq-worker
     command: rq worker -u redis://redis:6379 high normal low
     deploy:
-      replicas: 3
+      replicas: 1

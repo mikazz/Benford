@@ -24,7 +24,11 @@ at a time. Within a worker, there is no concurrent processing going on, so if we
 we simply have to start more workers (easier scalability).
 
 ## Running
-Check docker-compose.yml
+Check docker-compose.yml:
+
+* $ docker-compose up
+
+
 
 Windows (manually without docker):
 * Run app: webapp/app/app.py
