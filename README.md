@@ -1,8 +1,10 @@
 # Benford
- 
+
+![mark](examples/example_1.png)
+
  ## Main
 
-* User input validation and protection
+* User input validation
 * The preferred form of asynchronous execution - a separate worker that could potentially work on another machine 
 and some kind of communication system between them (e.g. through RabbitMQ or Redis).
 * The solution should include automatic tests.
@@ -16,10 +18,10 @@ computations over it.
 * Because files can be any length, the computations can also be very long.
 * Because of such reason we need some sort of asynchronous execution of our code, so that our users would be allowed to 
 see what's happening with their order (stopped?, running?, done?).
-* I'm using Redis to meet this requirement. It's a message broker. Our application will send him a basic task 
-information. And job (computations) will be executed by separate worker(s). Each worker will process a single job
+* I'm using Redis (message broker) to meet this requirement. Flask application will be sending him a basic task 
+information. Job (computations) will be executed by separate worker(s). Each worker will process a single job
 at a time. Within a worker, there is no concurrent processing going on, so if we want to perform more jobs concurrently,
-we simply have to start more workers (scalability).
+we simply have to start more workers (easier scalability).
 
 ## Running
 Check docker-compose.yml
@@ -29,8 +31,6 @@ Windows (manually without docker):
 * Run worker: webapp/app/worker.py
 * Run Redis Server: _Redis-x64-3.2.100/redis-server.exe
 * Run MongoDB server.exe
-
-![mark](examples/example_1.png)
 
 ## References
 * [Python 3.7.4](https://www.python.org/)

@@ -1,7 +1,3 @@
-"""
-    Tests
-"""
-
 from flask_testing import TestCase
 import unittest
 from webapp.app.app import app
@@ -50,6 +46,7 @@ class TestMainBlueprint(BaseTestCase):
 
         # When
         response = self.client.post('/job', data=payload)
+        print(response)
 
         # Then
         #self.assertEqual("success", response.json['status'])
