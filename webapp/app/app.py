@@ -104,7 +104,7 @@ def upload_file():
             return redirect(request.url)
 
 
-@app.route('/job', methods=['POST'])
+@app.route('/job/<directory_name>', methods=['POST'])
 def run_job(directory_name):
     job_function_name = run_benford_job
 

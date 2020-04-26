@@ -30,8 +30,6 @@ Windows (manually without docker):
 * Run Redis Server: _Redis-x64-3.2.100/redis-server.exe
 * Run MongoDB server.exe
 
-![mark](examples/example_1.png)
-
 ## References
 * [Python 3.7.4](https://www.python.org/)
 * [Redis](https://redis.io/)

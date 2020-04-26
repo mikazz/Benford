@@ -12,7 +12,11 @@ Traceback (most recent call last):
 TypeError: can only concatenate str (not "int") to str
 
 
-The value you are concatenating needs to be same type, both int or str. 
+>>> x='1'
+>>> y=3
+>>> x+y
+
+Values you are concatenating needs to be same type, both int or str. 
 Quotes makes this difference. Remove them manually from '1' in line 45 or convert it to int('1') 
 to "performs_calculations" correctly
 
@@ -38,7 +42,7 @@ Traceback (most recent call last):
 TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
 
-Same problem, but types are inverted. Remove manually quotes from '3' in line 46, or convert it to int
+Same problem as in 1, but this time, types are just inverted. Remove manually quotes from '3' in line 46, or convert it to int
 >>> type(int('3')) is type(7)
 True
 
@@ -57,8 +61,8 @@ Traceback (most recent call last):
 TypeError: can't multiply sequence by non-int of type 'str'
 
 
-An error says: you can't multiply sequence by non-int of type in this example its string.
-There are six sequence types: strings, Unicode strings, lists, tuples, buffers, and range objects. Which
+Error specify that: you can't multiply sequence by non-int of type (like string).
+There are six sequence types in Python: strings, Unicode strings, lists, tuples, buffers, and range objects. Which all of them
 cannot be mulitplied by anything besides int. Generally interpreter doesn't specify what should be expected behavior
 when such thing occur so it just throw an error. Remove quotes in line 47 from '3', '3' or convert to int()
 
@@ -77,15 +81,17 @@ Traceback (most recent call last):
 TypeError: can't multiply sequence by non-int of type 'list'
 
 
-Same as above. Manually remove brackets in line 48 from [4] and [3] or extract those elements, there is only one in both so
-it all boils down to this:
+Lists support multiplication by an integer, and this means "make a list that is n copies of the starting list".
+Other multiplication is not allowed. (this time you are trying to multiply two lists)
+
+Manually remove brackets in line 48 from [4] and [3] or extract those elements. It all boils down to this:
 >>> x = [4][0]
 >>> y = [3][0]
 >>> x*y
 12
 
-If you really want to do [4]*[3] You can also write your own class to perform those kind of things. 
-Just overload the operators with: def __mul__(self, arg):
+If you really want to do [4]*[3] You can also write your own list class to perform those kind of things. 
+Just overload the operators inside with: def __mul__(self, arg):
 
 to make it return something like this:
 [a*b for a,b in zip([4],[3])]
@@ -108,6 +114,11 @@ Traceback (most recent call last):
 ValueError: Invalid
 
 
+ValueError is raised when an operation or function receives an argument that has 
+the right type but an inappropriate value. Look at line 49 to check if provided argument 3 is 
+inside the given boundaries by spelunk().
+
+
 Traceback Problem 6
 ===================
 Traceback (most recent call last):
@@ -122,7 +133,7 @@ TypeError: zip argument #2 must support iteration
 
 
 In line 30 you are trying to use zip() on (line 50) [1, 2, 3] and 1. The zip() function takes iterables 
-(can be zero or more), aggregates them in a tuple, and return it. However 1 out of 2 passed arguments is not an iterator
+(can be zero or more), aggregates them in a tuple, and returns it. However 1 out of 2 passed arguments is not an iterator
 Lists, tuples, dictionaries, sets, strings are iterable. All these objects have a iter() method which is used to 
 get an iterator. To make this work make a second list - [1, 2, 3] and [1] in line 50.
 
@@ -148,6 +159,21 @@ Traceback (most recent call last):
 TypeError: can only concatenate list (not "int") to list
 
 
+zip() pairs 2 lists elements with a rule: first to first, second to second.
+When we examine the issue, we will see what we were trying to do:
+>>> x=[1, 2, [3]]
+>>> y=[4, 5, 6]
+>>> [str(x) + "+" + str(y) for x, y in zip(x, y)]
+['1+4', '2+5', '[3]+6']
+
+
+>>> x=[1, 2, 3]
+>>> y=[4, 5, 6]
+>>> [(x + y) for x, y in zip(x, y)]
+[5, 7, 9]
+
+
+
 Traceback Problem 8
 ===================
 Traceback (most recent call last):
@@ -167,16 +193,17 @@ TypeError: unsupported operand type(s) for +: 'int' and 'str'
 In line 52 you are providing a dictionary:
 >>> d = {'one': 1, 'two': '2'}
 
-In line 26 You are extracting it's values by key, 
-d[k1] it's d['one'] because k1 is an element in a tuple 'one'
-d[k2] it's d['two'] because k2 is an element in a tuple 'two'
+In line 26 You are extracting it's values by keys
+d[k1] it's d['one'] because k1 = 'one'
+d[k2] it's d['two'] because k2 = 'two'
 
+However one of the values is a string.
 >>> d['one'] 
 1
 >>> d['two']
 '2'
 
-And in line 12 trying do add type int to type string which is not allowed. Remove quotes from value '2'
+And in line 12 trying do add them. Again adding type int to type string is not allowed. Remove quotes from value '2'
 
 
 Traceback Problem 9
@@ -195,7 +222,11 @@ In line 53 you provide an empty dictionary: {}
 In line 26 you are trying to extract values by keys, which however cannot be done, because
 such key doesn't exist (yet). Provide it in line 53:
 
-{'one': 1, 'two': 5}
+d = {'one': 1, 'two': 5}
+>>> d["one"]
+1
+>>> d["two"]
+5
 
 
 

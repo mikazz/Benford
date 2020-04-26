@@ -38,62 +38,22 @@ class TestMainBlueprint(BaseTestCase):
         # Then
         self.assertEqual(response.status_code, 200)
 
-
-
-    def test_post_job_get_text(self):
+    def test_post_job(self):
         """
             Test Add Job
         """
 
         # Given
         payload = {
-            "page_url": "https://www.google.com/",
-            "function": "get_text"
+            "directory_name": "test",
         }
 
         # When
         response = self.client.post('/job', data=payload)
 
         # Then
-        self.assertEqual("success", response.json['status'])
+        #self.assertEqual("success", response.json['status'])
         self.assertEqual(202, response.status_code)
-
-    def test_post_job_get_images(self):
-        """
-            Test Add Job
-        """
-
-        # Given
-        payload = {
-            "page_url": "https://www.google.com/",
-            "function": "get_images"
-        }
-
-        # When
-        response = self.client.post('/job', data=payload)
-
-        # Then
-        self.assertEqual("success", response.json['status'])
-        self.assertEqual(202, response.status_code)
-
-    def test_post_job_with_bad_function(self):
-        payload = {
-            "page_url": "https://www.google.com/",
-            "function": "get_"
-        }
-
-        response = self.client.post('/job', data=payload)
-        # 400 - Bad request
-        self.assertEqual(400, response.status_code)
-
-    def test_post_job_with_no_function(self):
-        payload = {
-            "page_url": "https://www.google.com/"
-        }
-
-        response = self.client.post('/job', data=payload)
-        # 400 - Bad request
-        self.assertEqual(400, response.status_code)
 
 
 if __name__ == "__main__":
