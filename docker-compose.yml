@@ -3,11 +3,11 @@ version: '3.5'
 services:
 
   web:
-    build: ./webapp
+    build: ./webapp/app
     image: webapp
     container_name: webapp
     ports:
-      - "0.0.0.0:5000:80"
+      - "127.0.0.1:5000:80"
     depends_on:
       - redis
       - mongodb
@@ -30,6 +30,6 @@ services:
   rq-worker:
     image: jaredv/rq-docker:0.0.2
     container_name: rq-worker
-    command: rq worker -u redis://rq-server:6379 high normal low
+    command: rq worker -u redis://redis:6379 high normal low
     deploy:
       replicas: 3
