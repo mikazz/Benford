@@ -29,9 +29,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config.from_object(rq_dashboard.default_settings)
 app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
-HOST = "127.0.0.1"
-PORT = 5000
-DEBUG = False
+HOST = "0.0.0.0"
+#PORT = 5000
+#DEBUG = False
 
 # MONGO DATABASE CONFIGURATION (Jobs and Results databases)
 
@@ -218,4 +218,4 @@ def get_jobs():
 
 
 if __name__ == '__main__':
-    app.run(host=HOST, port=PORT, debug=DEBUG)
+    app.run(host=HOST)

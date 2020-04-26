@@ -4,3 +4,5 @@ rq_dashboard
 flask
 flask_testing
 pymongo
+matplotlib
+pandas
