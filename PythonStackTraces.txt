@@ -17,8 +17,8 @@ TypeError: can only concatenate str (not "int") to str
 >>> x+y
 
 Values you are concatenating needs to be same type, both int or str. 
-Quotes makes this difference. Remove them manually from '1' in line 45 or convert it to int('1') 
-to "performs_calculations" correctly
+Quotes makes this difference. Remove them manually from '1' in line 45 or convert it to int('1') -> 1
+to "perform_calculations" correctly
 
 >>> type('1')
 <class 'str'>
@@ -166,6 +166,7 @@ When we examine the issue, we will see what we were trying to do:
 >>> [str(x) + "+" + str(y) for x, y in zip(x, y)]
 ['1+4', '2+5', '[3]+6']
 
+Again concatenation of something different then list to another list is forbidden.
 
 >>> x=[1, 2, 3]
 >>> y=[4, 5, 6]
