@@ -17,6 +17,8 @@ services:
     container_name: redis
     ports:
       - 6379:6379
+    expose:
+      - '6379'
 
   mongodb:
     image: mongo:4.2-bionic
@@ -33,3 +35,5 @@ services:
     command: rq worker -u redis://redis:6379 high normal low
     deploy:
       replicas: 1
+    depends_on:
+      - redis

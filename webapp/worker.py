@@ -8,6 +8,7 @@ import sys
 
 from sys import platform
 from rq import Connection
+from redis import Redis
 
 if platform == "linux" or platform == "linux2":
     from rq import Worker  # best worker (has fork)
@@ -22,7 +23,7 @@ elif platform == "win32":
 # from job import ...
 
 # Provide queue names to listen to as arguments to this script, similar to rq worker
-with Connection():
+with Connection(connection=Redis(host="redis")):
     qs = sys.argv[1:] or ['default']  # REDIS_QUEUES
     w = Worker(qs)
     w.work()

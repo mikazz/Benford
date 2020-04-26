@@ -29,14 +29,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config.from_object(rq_dashboard.default_settings)
 app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
-HOST = "0.0.0.0"
+#HOST = "0.0.0.0"
 #PORT = 5000
 #DEBUG = False
 
 # MONGO DATABASE CONFIGURATION (Jobs and Results databases)
 
 # Connecting to MongoDB
-client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb', 27017)
 # Getting a Database
 db = client['app']
 
@@ -108,7 +108,7 @@ def upload_file():
 def run_job(directory_name):
     job_function_name = run_benford_job
 
-    with Connection(connection=Redis()):
+    with Connection(connection=Redis(host="redis")):
         q = Queue()
         job = q.enqueue(job_function_name, directory_name=directory_name, job_timeout=60)
 
@@ -133,7 +133,7 @@ def run_job(directory_name):
 @app.route('/job/<job_id>')
 def get_job(job_id):
 
-    with Connection(connection=Redis()):
+    with Connection(connection=Redis(host="redis")):
         q = Queue()
         job = q.fetch_job(job_id)
     if job:
@@ -218,4 +218,4 @@ def get_jobs():
 
 
 if __name__ == '__main__':
-    app.run(host=HOST)
+    app.run()
