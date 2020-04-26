@@ -214,7 +214,6 @@ def get_jobs():
         jobs.append(job)
 
     jobs_list = [job["key"] for job in jobs if "key" in job]  # that's nice
-
     return render_template('jobs.html', jobs=list(jobs_list))
 
 

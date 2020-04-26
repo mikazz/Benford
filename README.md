@@ -21,6 +21,15 @@ information. And job (computations) will be executed by separate worker(s). Each
 at a time. Within a worker, there is no concurrent processing going on, so if we want to perform more jobs concurrently,
 we simply have to start more workers (scalability).
 
+## Running
+Check docker-compose.yml
+
+Windows (without docker):
+* Manually run app: webapp/app/app.py
+* Manually run worker: webapp/app/worker.py
+* Run Redis Server: _Redis-x64-3.2.100/redis-server.exe
+* Run MongoDB server.exe
+
 ## References
 * [Redis](https://redis.io/)
 * [RQ (Redis Queue): Simple Redis job queues management for Python](https://python-rq.org/)
@@ -28,7 +37,6 @@ we simply have to start more workers (scalability).
 * [PyMongo: MongoDB Connector](https://pymongo.readthedocs.io/en/stable/)
 * [rq_dashboard: Dashboard for RQ Stats](https://github.com/Parallels/rq-dashboard)
 * [flask_testing: Easy testing for flask](https://pythonhosted.org/Flask-Testing/)
-
 
 ## Log
 * v1.00 Release 26-04-2020

@@ -95,17 +95,6 @@ class TestMainBlueprint(BaseTestCase):
         # 400 - Bad request
         self.assertEqual(400, response.status_code)
 
-    def test_post_long_job(self):
-        """
-            curl -X POST -F "duration=3" http://127.0.0.1:5000/long_job
-        """
-        payload = {
-            "duration": "3"
-        }
-        response = self.client.post("/long_job", data=payload, follow_redirects=True)
-        # 202 - Accepted
-        self.assertEqual(202, response.status_code)
-
 
 if __name__ == "__main__":
     unittest.main()

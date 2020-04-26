@@ -1,10 +1,35 @@
-version: '3'
+version: '3.5'
+
 services:
+
   web:
-    build: .
+    build: ./webapp
+    image: webapp
+    container_name: webapp
     ports:
-     - "5000:5000"
-    volumes:
-     - .:/code
+      - "0.0.0.0:5000:80"
+    depends_on:
+      - redis
+      - mongodb
+
   redis:
-    image: "redis:alpine"
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - 6379:6379
+
+  mongodb:
+    image: mongo:4.2-bionic
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    deploy:
+      restart_policy:
+        condition: always
+
+  rq-worker:
+    image: jaredv/rq-docker:0.0.2
+    container_name: rq-worker
+    command: rq worker -u redis://rq-server:6379 high normal low
+    deploy:
+      replicas: 3
