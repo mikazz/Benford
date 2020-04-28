@@ -1,7 +1,6 @@
 version: '3.5'
 
 services:
-
   web:
     build: ./webapp
     image: webapp
@@ -28,25 +27,26 @@ services:
       - "27017:27017"
 
   rq-worker:
-    build: ./worker
-    image: worker
+    image: jaredv/rq-docker:0.0.2
     volumes:
       - data-volume:/app/uploads
       - data-volume:/app/images
-    container_name: rq_worker
+    container_name: rq-worker
+    command: rq worker -u redis://redis-server:6379 high normal low
+    deploy:
+      replicas: 1
     depends_on:
       - redis-server
-      - mongodb
       
-  dashboard:
+  rq-dashboard:
     build: ./dashboard
-    image: dashboard
-    container_name: dashboard
+    image: rq-dashboard
+    container_name: rq-dashboard
     ports:
       - "9181:9181"
     command: rq-dashboard -H redis-server
     depends_on:
       - redis-server
-
+      
 volumes:
   data-volume:

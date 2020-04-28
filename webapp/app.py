@@ -108,7 +108,7 @@ def upload_file():
 def run_job(directory_name):
     job_function_name = run_benford_job
 
-    with Connection(connection=Redis(host="redis")):
+    with Connection(connection=Redis(host="redis-server")):
         q = Queue()
         job = q.enqueue(job_function_name, directory_name=directory_name, job_timeout=60)
 
@@ -133,7 +133,7 @@ def run_job(directory_name):
 @app.route('/job/<job_id>')
 def get_job(job_id):
 
-    with Connection(connection=Redis(host="redis")):
+    with Connection(connection=Redis(host="redis-server")):
         q = Queue()
         job = q.fetch_job(job_id)
     if job:

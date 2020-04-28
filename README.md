@@ -26,15 +26,25 @@ we simply have to start more workers (easier scalability).
 ## Running
 Check docker-compose.yml:
 
+### Run Docker
 * $ docker-compose up
+* Open your browser to http://localhost:5000 to view the app or 
+* Open to http://localhost:9181 to view the RQ dashboard.
+
+Build/Rebuild the image
+* $ docker-compose up --build
 
 
 
-Windows (manually without docker):
+
+### Run Windows (manually without docker):
 * Run app: webapp/app/app.py
 * Run worker: webapp/app/worker.py
 * Run Redis Server: _Redis-x64-3.2.100/redis-server.exe
 * Run MongoDB server.exe
+* Open your browser to http://localhost:5000 to view the app
+
+
 
 ## References
 * [Python 3.7.4](https://www.python.org/)
